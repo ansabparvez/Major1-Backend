@@ -11,15 +11,13 @@ userApp.use(authMiddleware);
 
 exports.users = functions.https.onRequest(userApp);
 
-userApp.get("isRegistrationFinished", async(request, response) => {
-    console.log("in api");
-    const body = request.body;
-    const userId = await authMiddleware.getUserId(request);
+userApp.get("/isRegistrationFinished", async(request, response) => {
+    const userId = request.user.uid;
     const userDocument = firestore.doc("Users/"+userId);
     const status = (await userDocument.get()).exists;
 
     const jsonResponse = {
-        "result" : "Success",
+        "success":true,
         "registrationFinished":status
     };
 
