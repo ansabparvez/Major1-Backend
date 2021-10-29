@@ -7,7 +7,7 @@ const authMiddleware = require('./authMiddleware');
 const firestore = admin.firestore();
 const userApp = express();
 userApp.use(cors({origin: true}));
-userApp.use(authMiddleware);
+//userApp.use(authMiddleware);
 
 exports.users = functions.https.onRequest(userApp);
 
@@ -22,5 +22,17 @@ userApp.get("/isRegistrationFinished", async(request, response) => {
     };
 
     response.status(201).send(JSON.stringify(jsonResponse));
+})
 
+userApp.post("/completeRegistration", async(request, response) => {
+    //const userId = request.user.uid;
+    const userId = "dgst43bvfsdt43"
+    const userDocument = firestore.doc("Users/"+userId);
+    const userData = {...request.body};
+    const jsonResponse = {
+        "success":true
+    };
+    await userDocument.set(userData);
+
+    response.status(201).send(JSON.stringify({...jsonResponse}));
 })
