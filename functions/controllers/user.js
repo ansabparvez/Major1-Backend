@@ -44,6 +44,34 @@ userApp.get("/isUserNameAvailable", async(request, response) => {
     response.status(201).send(JSON.stringify(jsonResponse));
 })
 
+userApp.get("/findUser", async(request, response) => {
+    const userName = request.query.userName;
+    const usersCollection = firestore.collection("Users/");
+    console.log("user name is "+userName)
+    const snapShot = await usersCollection.where("userName", '==', userName).get()
+    var isUserNameAvailable = false;
+    var jsonResponse = {};
+
+    if(snapShot.empty){
+        jsonResponse = {
+            "success":false,
+            "error":"No User found with this user name."
+        }
+    }else{
+        snapShot.forEach(doc => {
+            console.log(doc.data())
+            const userData = doc.data();
+            jsonResponse = {
+                "success":true,
+                "userName":userData.userName,
+                "name":userData.name
+            }
+        })
+    }
+
+    response.status(201).send(JSON.stringify(jsonResponse));
+})
+
 userApp.post("/completeRegistration", async(request, response) => {
     const userId = request.user.uid;
     //const userId = "dgst43bvfsdt43"
