@@ -15,12 +15,21 @@ exports.users = functions.https.onRequest(userApp);
 userApp.get("/isRegistrationFinished", async(request, response) => {
     const userId = request.user.uid;
     const userDocument = firestore.doc("Users/"+userId);
-    const status = (await userDocument.get()).exists;
+    const documentSnapshot = await userDocument.get();
+    const status = documentSnapshot.exists;
 
-    const jsonResponse = {
+    var jsonResponse = {
         "success":true,
-        "registrationFinished":status
+        "registrationFinished":false
     };
+
+    if(status){
+        jsonResponse = {
+            "success":true,
+            "registrationFinished":true,
+            "userData": {...documentSnapshot.data()}
+        };
+    }
 
     response.status(201).send(JSON.stringify(jsonResponse));
 })
@@ -83,7 +92,27 @@ userApp.post("/completeRegistration", async(request, response) => {
     await userDocument.set(userData);
 
     const jsonResponse = {
-        "success":true
+        "success":true,
+        "userData":{...userData}
+    };
+
+    response.status(201).send(JSON.stringify({...jsonResponse}));
+})
+
+userApp.post("/updateFcmToken", async(request, response) => {
+    const userId = request.user.uid;
+    //const userId = "dgst43bvfsdt43"
+    const userDocument = firestore.doc("Users/"+userId);
+    var fcmToken = {fcmToken: request.body.fcmToken}
+
+    await userDocument.update(fcmToken)
+    .then((result) => {
+        console.log(result)
+    })
+
+    const jsonResponse = {
+        "success":true,
+        "userData":{...fcmToken}
     };
 
     response.status(201).send(JSON.stringify({...jsonResponse}));
