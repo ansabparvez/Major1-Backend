@@ -15,4 +15,6 @@ admin.initializeApp({
 // });
 
 const user = require('./controllers/user');
+const messesing = require('./controllers/messages');
 exports.userV1 = user.users; 
+exports.messages = messesing.message;
