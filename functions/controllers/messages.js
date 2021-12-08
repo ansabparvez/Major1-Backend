@@ -12,7 +12,7 @@ messageApp.use(authMiddleware);
 
 exports.message = functions.https.onRequest(messageApp);
 
-messageApp.post("/sendMessage", async(request, response) => {
+messageApp.post("/sendMessageToKnownUser", async(request, response) => {
     const body = request.body;
     const receiverId = body.receiverId;
     const snapshot = await firestore.collection("Users").where('userName', '==', receiverId).get();
@@ -23,12 +23,11 @@ messageApp.post("/sendMessage", async(request, response) => {
 
     const message = {
         data: {
-          type: body.type,
           messageId: body.messageId,
           text: body.text,  
           time: body.time,
           userName: body.userName,
-          isAnonymous: body.isAnonymous
+          isAnonymous: "true"
         },
         token: fcmToken
       };
@@ -44,4 +43,37 @@ messageApp.post("/sendMessage", async(request, response) => {
       })   
 
     response.status(201).send(JSON.stringify({...jsonResponse}));
+})
+
+messageApp.post("/sendMessageToUnknownUser", async(request, response) => {
+  const body = request.body;
+  const receiverId = body.receiverId;
+  const snapshot = await firestore.collection("Users").where('anonymousId', '==', receiverId).get();
+  var fcmToken;
+  snapshot.forEach(doc => {
+      fcmToken = doc.data().fcmToken
+  });
+
+  const message = {
+      data: {
+        messageId: body.messageId,
+        text: body.text,  
+        time: body.time,
+        userName: body.userName,
+        isAnonymous: "false"
+      },
+      token: fcmToken
+    };
+
+    var jsonResponse = {};
+    
+    await admin.messaging().send(message, false)
+    .then((response) => {
+      jsonResponse = {"success":true}
+    })
+    .catch((error)=>{
+      jsonResponse = {"success":false}
+    })   
+
+  response.status(201).send(JSON.stringify({...jsonResponse}));
 })
