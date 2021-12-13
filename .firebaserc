@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "major1-99a4c"
-  }
+    "default": "begnn-app"
+  },
+  "targets": {}
 }

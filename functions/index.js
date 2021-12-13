@@ -2,7 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 var serviceAccount = require("./confedential/serviceAccountKey.json");
 admin.initializeApp({
-    projectId: "major1-99a4c",
+    projectId: "begnn-app",
     credential: admin.credential.cert(serviceAccount)
 });
 

@@ -53,7 +53,7 @@ userApp.get("/isUserNameAvailable", async(request, response) => {
     response.status(201).send(JSON.stringify(jsonResponse));
 })
 
-userApp.get("/findUser", async(request, response) => {
+userApp.get("*/findUser", async(request, response) => {
     const userName = request.query.userName;
     const usersCollection = firestore.collection("Users/");
     console.log("user name is "+userName)
