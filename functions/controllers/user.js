@@ -4,6 +4,7 @@ const cors = require('cors')
 const admin = require('firebase-admin')
 const authMiddleware = require('./authMiddleware');
 const uuid = require('uuid')
+const nameGenerator = require('./anonymousNameGenerator')
 
 const firestore = admin.firestore();
 const userApp = express();
@@ -12,7 +13,7 @@ userApp.use(authMiddleware);
 
 exports.users = functions.https.onRequest(userApp);
 
-userApp.get("/isRegistrationFinished", async(request, response) => {
+userApp.get("*/isRegistrationFinished", async(request, response) => {
     const userId = request.user.uid;
     const userDocument = firestore.doc("Users/"+userId);
     const documentSnapshot = await userDocument.get();
@@ -34,7 +35,7 @@ userApp.get("/isRegistrationFinished", async(request, response) => {
     response.status(201).send(JSON.stringify(jsonResponse));
 })
 
-userApp.get("/isUserNameAvailable", async(request, response) => {
+userApp.get("*/isUserNameAvailable", async(request, response) => {
     const userName = request.query.userName;
     const usersCollection = firestore.collection("Users/");
     console.log("user name is "+userName)
@@ -58,7 +59,6 @@ userApp.get("*/findUser", async(request, response) => {
     const usersCollection = firestore.collection("Users/");
     console.log("user name is "+userName)
     const snapShot = await usersCollection.where("userName", '==', userName).get()
-    var isUserNameAvailable = false;
     var jsonResponse = {};
 
     if(snapShot.empty){
@@ -81,13 +81,40 @@ userApp.get("*/findUser", async(request, response) => {
     response.status(201).send(JSON.stringify(jsonResponse));
 })
 
-userApp.post("/completeRegistration", async(request, response) => {
+userApp.get("*/getAnonymousUserData", async(request, response) => {
+    const anonymousId = request.query.anonymousId;
+    const usersCollection = firestore.collection("Users/");
+    const snapShot = await usersCollection.where("anonymousId", '==', anonymousId).get()
+    var jsonResponse = {};
+
+    if(snapShot.empty){
+        jsonResponse = {
+            "success":false,
+            "error":"No User found with this user name."
+        }
+    }else{
+        snapShot.forEach(doc => {
+            console.log(doc.data())
+            const userData = doc.data();
+            jsonResponse = {
+                "success":true,
+                "anonymousId":userData.anonymousId,
+                "anonymousName":userData.anonymousName
+            }
+        })
+    }
+
+    response.status(201).send(JSON.stringify(jsonResponse));
+})
+
+userApp.post("*/completeRegistration", async(request, response) => {
     const userId = request.user.uid;
     //const userId = "dgst43bvfsdt43"
     const userDocument = firestore.doc("Users/"+userId);
     var userData = {...request.body};
     userData.userId = userId;
     userData.anonymousId = uuid.v4().replace(/\-/g,'');
+    userData.anonymousName = "Anonymous " + nameGenerator.randomName()
 
     await userDocument.set(userData);
 
@@ -99,7 +126,7 @@ userApp.post("/completeRegistration", async(request, response) => {
     response.status(201).send(JSON.stringify({...jsonResponse}));
 })
 
-userApp.post("/updateFcmToken", async(request, response) => {
+userApp.post("*/updateFcmToken", async(request, response) => {
     const userId = request.user.uid;
     //const userId = "dgst43bvfsdt43"
     const userDocument = firestore.doc("Users/"+userId);
