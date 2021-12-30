@@ -1,3 +1,4 @@
 node_modules/
 
 confedential/
+confedential/serviceAccountKey.json

@@ -21,10 +21,27 @@
     },
     "auth": {
       "port": 9099
+    },
+    "hosting": {
+      "port": 5000
     }
   },
   "functions": {
     "source": "functions",
     "predeploy": []
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }
