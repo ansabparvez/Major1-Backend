@@ -107,6 +107,24 @@ userApp.get("*/getAnonymousUserData", async(request, response) => {
     response.status(201).send(JSON.stringify(jsonResponse));
 })
 
+userApp.get("*/deleteUser", async(request, response) => {
+    const userId = request.user.uid;
+    //const userId = "dgst43bvfsdt43"
+    const userDocument = firestore.doc("Users/"+userId);
+    
+
+    await userDocument.delete()
+    .then((result) => {
+        console.log(result)
+    })
+
+    const jsonResponse = {
+        "success":true,
+    };
+
+    response.status(201).send(JSON.stringify({...jsonResponse}));
+})
+
 userApp.post("*/completeRegistration", async(request, response) => {
     const userId = request.user.uid;
     //const userId = "dgst43bvfsdt43"
@@ -140,6 +158,24 @@ userApp.post("*/updateFcmToken", async(request, response) => {
     const jsonResponse = {
         "success":true,
         "userData":{...fcmToken}
+    };
+
+    response.status(201).send(JSON.stringify({...jsonResponse}));
+})
+
+userApp.get("*/deleteUser", async(request, response) => {
+    const userId = request.user.uid;
+    //const userId = "dgst43bvfsdt43"
+    const userDocument = firestore.doc("Users/"+userId);
+    
+
+    await userDocument.delete()
+    .then((result) => {
+        console.log(result)
+    })
+
+    const jsonResponse = {
+        "success":true,
     };
 
     response.status(201).send(JSON.stringify({...jsonResponse}));
